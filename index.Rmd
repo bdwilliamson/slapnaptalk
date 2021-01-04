@@ -1,0 +1,66 @@
+---
+title: "Statistical inference and containerization in computational pipelines"
+author: "Brian D. Williamson, PhD<br> <span style= 'font-size: 75%;'> Fred Hutchinson Cancer Research Center </span>"
+date: "`r format(as.Date(Sys.Date(), '%d%b%Y'), '%d %B, %Y')`<br> <a href = 'https://bdwilliamson.github.io/#talks' style = 'color: white;'>https://bdwilliamson.github.io/#talks</a>"
+output:
+  xaringan::moon_reader:
+    css: xaringan-themer.css
+    nature:
+      titleSlideClass: ["center", "middle"]
+      highlightStyle: tomorrow-night-blue
+      highlightLanguage: rmarkdown
+      highlightLines: false
+      slideNumberFormat: '%current%'
+      countIncrementalSlides: false
+---
+
+```{r xaringan-setup, include=FALSE, warning=FALSE}
+library("xaringanthemer")
+
+extra_css <- list(
+  ".small" =  list(`font-size` = "80%"),
+  ".large" =  list(`font-size` = "150%"),
+  ".huge" =  list(`font-size` = "300%"),
+  "ul li" = list(`margin-bottom` = "10px"),
+  ".gray" = list(color = "#C0C0C0"),
+  ".red" = list(color = "#FF0000"),
+  ".blue1" = list(color = "#3AABBE"),
+  ".blue2" = list(color = "#2A6D90"),
+  ".blue3" = list(color = "#446874"),
+  ".purple" = list(color = "#624474"),
+  ".mutedred" = list(color = "#745344"),
+  "a" = list(color = "#3AABBE"),
+  "a:hover" = list("text-decoration" = "underline")
+)
+# set up fonts
+style_mono_accent(
+  base_color = "#446874",
+  header_font_google = google_font("DM Sans"),
+  text_font_google   = google_font("DM Sans", "400", "400i"),
+  code_font_google   = google_font("Courier Prime"),
+  extra_css = extra_css
+)
+
+xaringanExtra::use_tile_view()
+```
+
+<style type="text/css">
+.remark-slide-content {
+    font-size: 22px
+}
+</style>
+
+## Acknowledgments
+
+pictures of Peter, Craig, David, Sohail(?)
+Adam, Bhavesh
+
+---
+
+## Motivation
+
+```{r, echo = FALSE, out.height="450px", fig.align="center"}
+knitr::include_graphics("img/examples.png")
+```
+
+---

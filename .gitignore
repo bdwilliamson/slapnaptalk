@@ -1,0 +1,5 @@
+# Ignore everything for hivde2020
+hivde2020/*
+
+*.Rproj
+*.Rproj.user
