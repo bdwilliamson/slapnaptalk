@@ -100,7 +100,7 @@ knitr::include_graphics("img/neutralized_hiv.png")
 ]
 
 .pull-right[
-```{r predprobs, echo = FALSE, out.width = "80%", fig.align = "center"}
+```{r predprobs, echo = FALSE, out.width = "90%", fig.align = "center"}
 knitr::include_graphics("img/pred_prob_resistance_slapnap.png")
 ```
 
@@ -114,7 +114,7 @@ knitr::include_graphics("img/pred_prob_resistance_slapnap.png")
 ```{r bnab-table, echo = FALSE}
 bnab_tab <- tibble::tibble(
   `bnAb regimen` = c("VRC01", "VRC07-523-LS", "PGT121", "VRC07-523-LS + PGDM1400", "VRC07-523-LS + PGT121", "VRC07-523-LS + 10-1074", "VRC07-523-LS + PGT121 + PGDM1400", "VRC01/PGDM1400-10E8v4 (trispecific)"),
-  `Clinical Trial(s)` = c("HVTN 703,704", "HVTN 121,128", "HVTN 130", "HVTN 130", "HVTN 130", "HVTN 130", "HVTN 130", "HVTN 129"),
+  `Clinical Trial(s)` = c("HVTN 703,704/HPTN 081,085", "HVTN 121, 127/HPTN 087", "HVTN 130/HPTN 089", "HVTN 130/HPTN 089", "HVTN 130/HPTN 089 and HVTN 136/HPTN 092", "HVTN 130/HPTN 089", "HVTN 130/HPTN 089", "HVTN 129/HPTN 088"),
   `Publicly-available observations` = c(828, 402, 656, 402, 402, 402, 402, 205)
 )
 knitr::kable(bnab_tab) %>%
@@ -370,8 +370,8 @@ To make the container that pulls CATNAP data, we need to:
 --
 
 .pull-left[
-* specify the operating system for the container
-* download all necessary software
+* specify the operating system
+* install necessary software
   * pull data from web (`wget`)
   * `R` (for data cleaning; specify a version)
   * `pandoc` (for Rmarkdown metadata)
@@ -434,7 +434,7 @@ knitr::include_graphics("img/dockerfile_opts-nab.png")
 
 ## Example: under the hood
 
-```{r data-example-dockerfile-6, echo = FALSE, out.width = "90%", fig.align = "center"}
+```{r data-example-dockerfile-6, echo = FALSE, out.width = "100%", fig.align = "center"}
 knitr::include_graphics("img/dockerfile_data.png")
 ```
 ---
@@ -442,7 +442,7 @@ knitr::include_graphics("img/dockerfile_data.png")
 ## Example: under the hood
 
 Example `run_analysis.sh`:
-```{r data-example-dockerfile-7, echo = FALSE, out.width = "90%", fig.align = "center"}
+```{r data-example-dockerfile-7, echo = FALSE, out.width = "100%", fig.align = "center"}
 knitr::include_graphics("img/run_analysis_data.png")
 ```
 ---
@@ -459,11 +459,11 @@ Predicting neutralization sensitivity (e.g., $\text{IC}_{50}$) using CATNAP data
 
 * how to .blue1[assess] this?
 
----
+--
 
-## Goodness of fit
+Goodness of fit!
 
-Common measures of goodness of fit:
+Common measures:
 
 --
 
@@ -484,8 +484,6 @@ With simple algorithms (e.g., linear regression):
 --
 
 * .blue2[inference] on population quantity
-
---
 
 ---
 
@@ -517,7 +515,7 @@ Why not .blue1[combine] these estimators!
 
 ## Stacking and super learning
 
-&zwj;Stacking .small[ [e.g., Wolpert (1992), _Neural Networks_] ]:
+&zwj;.blue1[Stacking] .small[ [e.g., Wolpert (1992), _Neural Networks_] ]:
 
 --
 
@@ -530,7 +528,7 @@ Why not .blue1[combine] these estimators!
 
 --
 
-&zwj;Super learning (SL) .small[ [van der Laan et al. (2007), _Stat Appl Genet Mol Biol_] ]:
+&zwj;.blue2[Super learning (SL)] .small[ [van der Laan et al. (2007), _Stat Appl Genet Mol Biol_] ]:
 * specific implementation of stacking
 * nice asymptotic guarantees
 
@@ -605,8 +603,8 @@ $V(f_0, P_0)$: _oracle predictiveness_
 --
 
 Example measures:
-* $R^2$ : $V(f, P) = 1 - E_P\{Y - f(X)\}^2 / var_P(Y)$
-* AUC: $V(f, P) = P\{f(X_1) < f(X_2) \mid Y_1 = 0, Y_2 = 1\}$
+* $R^2(P_0) = 1 - E_{P_0}\{Y - f_0(X)\}^2 / var_{P_0}(Y)$
+* $\text{AUC}(P_0) = P_0\{f_0(X_1) < f_0(X_2) \mid Y_1 = 0, Y_2 = 1\}$
 
 ---
 
@@ -701,7 +699,7 @@ Example use of .blue2[intrinsic] variable importance:
 
 Valid estimation and inference .blue1[using simple, plug-in estimators]!
 
-.small[ [Williamson et al. (2020), _Biometrics_; Williamson et al. (2020), _arXiv_]; extended in Williamson and Feng (2020), _ICML_ ]
+.small[ [Williamson et al. (2020), _Biometrics_; Williamson et al. (2020), _arXiv_; extended in Williamson and Feng (2020), _ICML_] ]
 
 ---
 
@@ -772,7 +770,7 @@ We evaluated SLAPNAP in two analyses:
 
 ---
 
-## Performance on single bnAbs
+## Single-bnAb performance
 
 ```{r single-nab, echo = FALSE, out.width = "100%", fig.align = "center"}
 knitr::include_graphics("img/single-nab_auc_fig.png")
@@ -781,10 +779,7 @@ knitr::include_graphics("img/single-nab_auc_fig.png")
 --
 
 .pull-left[
-Overall median CV-AUCs:
-* Hake and Pfeifer (2017): 0.71
-* Rawi et al. (2019): 0.84
-* SLAPNAP: 0.80
+Overall median CV-AUCs: 0.71 (HP), 0.84 (Rawi), 0.8 (SLAPNAP)
 ]
 
 .pull-right[
@@ -793,9 +788,9 @@ No clear winner over all epitopes
 
 ---
 
-## Performance on combination regimens
+## Combination-regimen performance
 
-```{r multi-nab, echo = FALSE, out.width = "75%", fig.align = "center"}
+```{r multi-nab, echo = FALSE, out.width = "70%", fig.align = "center"}
 knitr::include_graphics("img/multi-nab_auc_fig.png")
 ```
 ---
@@ -833,7 +828,7 @@ Avenues for future work:
 
 --
 
-[source code](https://github.com/benkeser/slapnap) | [Docker image](https://hub.docker.com/r/slapnap/slapnap)
+[source code](https://github.com/benkeser/slapnap) | [Docker image](https://hub.docker.com/r/slapnap/slapnap) | [preprint (bioRxiv)](https://www.biorxiv.org/content/10.1101/2020.06.23.167718v1)
 
 `r icon::fa('github')` https://github.com/bdwilliamson
 `r icon::fa('globe')` https://bdwilliamson.github.io
