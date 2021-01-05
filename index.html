@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Statistical inference and containerization in computational pipelines</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Brian D. Williamson, PhD   Fred Hutchinson Cancer Research Center" />
+    <link href="index_files/tile-view-0.2.3.9000/tile-view.css" rel="stylesheet" />
+    <script src="index_files/tile-view-0.2.3.9000/tile-view.js"></script>
+    <script src="index_files/kePrint-0.0.1/kePrint.js"></script>
+    <link href="index_files/font-awesome-5.3.1/css/fontawesome-all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, title-slide
+
+# Statistical inference and containerization in computational pipelines
+### Brian D. Williamson, PhD<br> <span style="font-size: 75%;"> Fred Hutchinson Cancer Research Center </span>
+### 06 January, 2021 <br> <a href = 'https://bdwilliamson.github.io/#talks' style = 'color: white;'>https://bdwilliamson.github.io/#talks</a>
+
+---
+
+
+
+
+&lt;style type="text/css"&gt;
+.remark-slide-content {
+    font-size: 22px
+}
+.remark-code, .remark-inline-code {
+    font-size: 18px;
+}
+&lt;/style&gt;
+
+## Acknowledgments
+
+This work was done in collaboration with:
+
+&lt;img src="img/slides_images_part1.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+with many thanks to:
+&lt;img src="img/slides_images_part2.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Motivation
+
+.pull-left[
+&lt;img src="img/amp.png" width="75%" style="display: block; margin: auto;" /&gt;
+
+.small[ NIH NIAID-sponsored HVTN + HPTN phase 2b HIV prevention efficacy trial; statistical design described in Gilbert et al. (2017) _Stat Commun Infect Dis_ ]
+
+&lt;img src="img/neutralized_hiv.png" width="75%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-right[
+&lt;img src="img/pred_prob_resistance_slapnap.png" width="80%" style="display: block; margin: auto;" /&gt;
+
+.small[ Magaret, Benkeser, Williamson et al. (2019) _PLoS Comput Biol_ ]
+]
+
+---
+
+## Snapshot: HVTN + HPTN planned bnAb clinical testing\*
+
+&lt;table class="table" style="font-size: 18px; margin-left: auto; margin-right: auto;"&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; bnAb regimen &lt;/th&gt;
+   &lt;th style="text-align:left;"&gt; Clinical Trial(s) &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Publicly-available observations &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC01 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 703,704 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 828 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC07-523-LS &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 121,128 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 402 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; PGT121 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 656 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC07-523-LS + PGDM1400 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 402 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC07-523-LS + PGT121 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 402 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC07-523-LS + 10-1074 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 402 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC07-523-LS + PGT121 + PGDM1400 &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 130 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 402 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; VRC01/PGDM1400-10E8v4 (trispecific) &lt;/td&gt;
+   &lt;td style="text-align:left;"&gt; HVTN 129 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 205 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+\* As of January 2020
+
+---
+
+## Critical issues in bnAb HIV prevention research
+
+For a given bnAb regimen (e.g., 1-, 2-, 3-bnAb, multispecific):
+
+--
+
+* what is the regimen's neutralization breadth*?
+
+--
+
+* what is the regimen's neutralization potency*?
+
+--
+
+.small[ *against HIV-1 viruses circulating in the relevant population]
+
+--
+
+We can address these questions with available data and machine learning.
+
+---
+
+## Data structure and notation
+
+In general: data `\(Z_1, \ldots, Z_n \stackrel{iid}{\sim} P_0\)`
+
+--
+
+* `\(Z_i := (X_i, Y_i);\)`
+
+--
+
+* `\(X_i \in \mathbb{R}^p\)` is a vector of covariates;
+
+--
+
+* `\(Y_i \in \mathbb{R}\)` is the outcome of interest;
+
+--
+
+&amp;zwj;**Goals**:
+1. Do a .green[good job] predicting `\(Y\)` using `\(X\)`
+
+--
+
+2. Understand how the features `\(\{X_j\}_{j = 1}^p\)` .green[affect] predictions
+
+--
+
+3. Ensure approaches to (1) and (2) are .green[reproducible]
+
+
+---
+
+## Questions
+
+&amp;zwj;**Goals**:
+1. Do a .green[good job] predicting `\(Y\)` using `\(X\)`
+2. Understand how the features `\(\{X_j\}_{j = 1}^p\)` .green[affect] predictions
+3. Ensure approaches to (1) and (2) are .green[reproducible]
+
+&amp;zwj;**Questions**:
+
+--
+
+1. How to .blue1[assess] prediction performance?
+
+--
+
+2. What do we mean by .blue1[affecting predictions]?
+
+--
+
+3. How to .blue1[encode many decisions] in a pipeline?
+
+---
+
+## Containerization: the problem
+
+Trying to run someone else's code:
+.code-box[
+\&gt; library(ggplot2) &lt;br&gt;
+.red[Error in library(ggplot2) : there is no package called ‘ggplot2’] &lt;br&gt;
+\&gt; install.packages("ggplot2") &lt;br&gt;
+.red[configure: error: no acceptable C compiler found in $PATH] &lt;br&gt;
+]
+
+--
+
+You Google the error, install `gcc`, re-install the package. On the next line:
+.code-box[
+\&gt; library(xgboost) &lt;br&gt;
+.red[Error in library(xgboost) : there is no package called ‘xgboost’] &lt;br&gt;
+\&gt; install.packages("xgboost") &lt;br&gt;
+.red[package ‘xgboost’ is not available (for R version 3.2.0)]
+]
+
+--
+
+...so you update `R`...
+
+--
+
+...but this breaks the fix for `ggplot2`.
+
+---
+
+## Containerization: the problem
+
+Making code reproducible for *you* `\(\neq\)` reproducible for __someone else__:
+
+--
+
+* Are the data publicly-available? Or behind a firewall?
+
+--
+
+* Can your code run on any operating system?
+
+--
+
+* What dependencies (e.g., packages) does your code rely on?
+
+--
+
+* Does your code rely on specific versions of software?
+
+--
+
+* ...
+
+--
+
+We want to package up all __analysis code and software__, allowing us to:
+* reproduce the analysis in its entirety, anywhere
+* control the environment exactly
+
+---
+
+## Containerization: the solution
+
+Think of a _container_ as a __virtual machine__:
+
+--
+
+* has its own operating system
+
+--
+
+* has its own file system
+
+--
+
+* has its own software applications
+
+--
+
+**You** specify all details for the container; users then .blue1[run] the container.
+
+--
+
+[Docker](https://www.docker.com/) is a popular containerization program.
+
+---
+
+## Docker process
+
+To create and run a container using Docker:
+
+--
+
+1. Write a `Dockerfile`: plain text telling Docker what to put in your _image_.
+
+--
+
+2. Build the image (using `docker build`).
+
+--
+
+3. Run the image (using `docker run`; creates the container) to execute code.
+
+---
+
+## Example: downloading and processing data
+
+&amp;zwj;CATNAP: publicly-available database .small[ [Yoon et al. (2015) _Nuclic Acids Res_] ]:
+
+* `\(\text{IC}_{50}\)` and `\(\text{IC}_{80}\)` neutralization values
+  * `\(\text{IC}_{x}\)`: concentration that neutralizes `\(x\)` percent of pseudoviruses
+
+--
+
+* several derived outcomes:
+  * for `\(J\)` nAbs, `\(\text{predicted IC}_{k} = \left(\sum_{j=1}^J \text{IC}_{k,j}^{-1}\right)^{-1}\)`
+  * `\(\text{Estimated sensitivity} = \text{predicted IC}_{50} &lt; 1\)`
+  * `\(\text{Multiple sensitivity} = \sum_{j=1}^J(\text{IC}_{50, j} &lt; 1) \geq 2\)`
+
+---
+
+## Example: downloading and processing data
+
+&amp;zwj;CATNAP: publicly-available database .small[ [Yoon et al. (2015) _Nuclic Acids Res_] ]:
+
+* Input feature groups:
+  * Amino acid sequence sites: gp120 CD4 binding sites, gp120 V2, gp120 V3, gp41 MPER
+  * Other groups: Region-specific counts of PNG sites, viral geometry, cysteine counts
+
+---
+
+## Example: downloading and processing data
+
+**S**uper **L**e**A**rner **P**rediction of **NA**b **P**anels (SLAPNAP):
+
+--
+
+* packaged as a Docker container
+
+--
+
+* options allow for simple CATNAP data pulling and cleaning
+
+--
+
+Example run (on Ubuntu): neutralization data for bnAb VRC01 (used in AMP)
+
+```bash
+sudo docker pull slapnap/slapnap
+sudo docker run \
+  -v "&lt;path to desired output directory&gt;:/home/output/" \
+  -e nab="VRC01" \
+  -e return="data" \
+  slapnap
+```
+
+&lt;img src="img/slapnap_datapull.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+To make the container that pulls CATNAP data, we need to:
+
+--
+
+.pull-left[
+* specify the operating system for the container
+* download all necessary software
+  * pull data from web (`wget`)
+  * `R` (for data cleaning; specify a version)
+  * `pandoc` (for Rmarkdown metadata)
+* install specific R packages
+]
+--
+.pull-right[
+* make directories
+  * store data
+  * store code
+  * store output
+* copy code into the container
+* specify user options (e.g., `nab`)
+* download CATNAP data
+]
+
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_init_blank.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_init_1.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_init_2.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_init_3.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_data-r-libs.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_opts-nab.png" width="60%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+&lt;img src="img/dockerfile_data.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Example: under the hood
+
+Example `run_analysis.sh`:
+&lt;img src="img/run_analysis_data.png" width="90%" style="display: block; margin: auto;" /&gt;
+---
+
+## Predicting neutralization sensitivity
+
+Predicting neutralization sensitivity (e.g., `\(\text{IC}_{50}\)`) using CATNAP data:
+
+--
+
+* want .green[good] predictions
+
+--
+
+* how to .blue1[assess] this?
+
+---
+
+## Goodness of fit
+
+Common measures of goodness of fit:
+
+--
+
+* Regression: `\(R^2\)` (MSE)
+
+--
+
+* Classification: accuracy, AUC
+
+--
+
+With simple algorithms (e.g., linear regression):
+
+--
+
+* point estimates .blue1[unbiased]
+
+--
+
+* .blue2[inference] on population quantity
+
+--
+
+---
+
+## More complex algorithms
+
+Your collaborator says "let's use machine learning!":
+
+--
+
+What algorithm to use?
+
+--
+
+* lasso, for sparsity?
+
+--
+
+* random forests, because trees?
+
+--
+
+* neural networks, for complex relationships?
+
+--
+
+Why not .blue1[combine] these estimators!
+
+---
+
+## Stacking and super learning
+
+&amp;zwj;Stacking .small[ [e.g., Wolpert (1992), _Neural Networks_] ]:
+
+--
+
+* specify a _library_ of learners (e.g., lasso, random forests)
+  * can have varying tuning parameters
+
+--
+
+* use cross-validation to build an _ensemble_ of these learners
+
+--
+
+&amp;zwj;Super learning (SL) .small[ [van der Laan et al. (2007), _Stat Appl Genet Mol Biol_] ]:
+* specific implementation of stacking
+* nice asymptotic guarantees
+
+--
+
+**Questions**
+* .red[are point estimates of predictivness unbiased]?
+* .red[can we do inference]?
+
+---
+
+## Cross-validated predictiveness
+
+Using .blue1[cross-validated] measures of predictiveness can help. .small[ [e.g., Hubbard et al. (2016), _Int J Biostat_] ]
+
+For each of `\(K\)` folds:
+* learn `\(f_{n,k}\)` (.blue1[fixed]) from training data
+* `\(P_{n,k}\)`: empirical distribution based on validation data
+
+--
+
+&amp;zwj;Examples:
+
+* .small[ .blue1[Population] ] `\({\small \text{CV-}R^2(P_0) = 1 - \frac{K^{-1}\sum_{k=1}^K E_{P_0}\{Y - f_{n,k}(X)\}^2}{var_{P_0}(Y)}}\)`
+
+--
+
+  * `\({\small \text{CV-}R^2(\{P_{n,k}\}_{k=1}^K) = 1 - \frac{K^{-1}\sum_{k=1}^K E_{P_{n,k}}\{Y - f_{n,k}(X)\}^2}{var_{P_n}(Y)}}\)`
+
+--
+
+* .small[ .blue1[Population] ] `\({\small \text{CV-AUC}(P_0) = K^{-1}\sum_{k=1}^K P_0\{f_{n,k}(X_1) &lt; f_{n,k}(X_2) \mid Y_1 = 0, Y_2 = 1\}}\)` ]
+
+--
+
+  * `\({\small \text{CV-AUC}(\{P_{n,k}\}_{k=1}^K) = K^{-1}\sum_{k=1}^K P_{n,k}\{f_{n,k}(X_1) &lt; f_{n,k}(X_2) \mid Y_1 = 0, Y_2 = 1\}}\)`
+
+---
+
+## Cross-validated predictiveness
+
+&amp;zwj;Pros:
+* .blue1[simple] estimator
+* .blue1[inference] based on the efficient influence function (EIF)
+* good .blue2[small-sample] properties .small[ [Benkeser et al. (2019)] ]
+
+--
+
+&amp;zwj;Cons:
+* .red[correct target parameter]?
+
+---
+
+## Population predictiveness
+
+We can instead view predictiveness as a .blue1[population] quantity. .small[ [e.g., Williamson et al. (2020), _arXiv_] ]
+
+--
+
+&amp;zwj;Define:
+
+* `\(V(f, P)\)`: .blue1[predictiveness] of `\(f \in \mathcal{F}\)` under distribution `\(P\)`
+
+--
+
+* `\(f_0 := \underset{f \in \mathcal{F}}{\text{arg}\,\text{max}}\, V(f, P_0)\)`: _oracle prediction function_ in `\(\mathcal{F}\)`
+
+--
+
+`\(V(f_0, P_0)\)`: _oracle predictiveness_
+
+--
+
+Example measures:
+* `\(R^2\)` : `\(V(f, P) = 1 - E_P\{Y - f(X)\}^2 / var_P(Y)\)`
+* AUC: `\(V(f, P) = P\{f(X_1) &lt; f(X_2) \mid Y_1 = 0, Y_2 = 1\}\)`
+
+---
+
+## Population predictiveness
+
+&amp;zwj;Pros:
+* .blue1[simple] estimator
+* .blue1[inference] based on the efficient influence function (EIF)
+
+&amp;zwj;Cons:
+* .red[need larger sample size]
+
+---
+
+## Example: adding Super Learning to the container
+
+Adding the regression task to the container:
+1. Create new `R` script that runs SL
+
+--
+
+2. Add to `Dockerfile`:
+  * install `R` packages (e.g., `SuperLearner`, `xgboost`, `glmnet`)
+  * copy new `R` script into container
+  * make executable
+
+--
+
+3. Add to `run_analysis.sh`:
+  * call new `R` script
+
+---
+
+## Example: Super Learning
+
+
+```bash
+sudo docker run \
+  -v "&lt;path to desired output directory&gt;:/home/output/" \
+  -e nab="VRC01" \
+  -e learners="lasso;rf;xgboost" \
+  -e nfolds="5" \
+  -e return="data;learner" \
+  slapnap
+```
+&lt;img src="img/slapnap_learner.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Understanding predictions
+
+Distinguishing between contributions of predictions...
+
+--
+
+* (.blue1[extrinsic importance]) ... .blue1[by a given (possibly black-box) algorithm]
+  .small[ [e.g., Breiman, (2001)] ]
+
+--
+
+* (.blue1[intrinsic importance]) ... .blue1[by best possible (i.e., oracle) algorithm]
+  .small[ [e.g., van der Laan (2006)] ]
+
+--
+
+Example use of .blue1[extrinsic] variable importance:
+* how does my algorithm use a given covariate in predictions?
+
+--
+
+Example use of .blue2[intrinsic] variable importance:
+* is it worth collecting a given covariate for the sake of predicting neutralization sensitivity?
+
+---
+
+## Inference on population variable importance
+
+.blue1[Intrinsic] importance can be defined using _oracle predictiveness_.
+
+--
+
+&amp;zwj;Define:
+* `\(f_{0,s} := \underset{f \in \mathcal{F}_{-s}}{\text{arg}\,\text{max}}\, V(f, P_0)\)`: _oracle prediction function_ in `\(\mathcal{F}_{-s}\)`
+* `\(V(f_{0,s}, P_0)\)`: _residual oracle predictiveness_
+
+--
+
+.green[Importance]: `\(V(f_0, P_0) - V(f_{0,s}, P_0)\)`
+
+--
+
+Valid estimation and inference .blue1[using simple, plug-in estimators]!
+
+.small[ [Williamson et al. (2020), _Biometrics_; Williamson et al. (2020), _arXiv_]; extended in Williamson and Feng (2020), _ICML_ ]
+
+---
+
+## Example: adding variable importance to the container
+
+Adding the regression task to the container:
+1. Add additional regressions to SL `R` script
+
+--
+
+2. Create new `R` script that estimates importance
+
+--
+
+3. Add to `Dockerfile`:
+  * install `R` package `vimp`
+  * copy new `R` script into container
+  * make executable
+
+--
+
+4. Add to `run_analysis.sh`:
+  * call new `R` script
+
+---
+
+## Example: putting it all together
+
+
+```bash
+sudo docker run \
+  -v "&lt;path to desired output directory&gt;:/home/output/" \
+  -e nab="VRC01" \
+  -e learners="lasso;rf;xgboost" \
+  -e nfolds="5" \
+  -e importance_ind="marg;pred" \
+  -e importance_grp="marg;cond" \
+  -e return="data;learner;report" \
+  slapnap
+```
+
+&lt;img src="img/slapnap_importance-report.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+---
+
+## Studying SLAPNAP performance
+
+We evaluated SLAPNAP in two analyses:
+
+--
+
+1. Studying .blue1[all single bnAbs] in CATNAP
+
+--
+
+  Compared against two methods:
+    * Hake and Pfeifer (2017): support vector machines
+    * Rawi et al. (2019): gradient boosted trees
+
+--
+
+2. Studying .green[combination regimens] with sufficient data
+
+--
+
+  Includes several regimens currently in clinical testing
+
+---
+
+## Performance on single bnAbs
+
+&lt;img src="img/single-nab_auc_fig.png" width="100%" style="display: block; margin: auto;" /&gt;
+
+--
+
+.pull-left[
+Overall median CV-AUCs:
+* Hake and Pfeifer (2017): 0.71
+* Rawi et al. (2019): 0.84
+* SLAPNAP: 0.80
+]
+
+.pull-right[
+No clear winner over all epitopes
+]
+
+---
+
+## Performance on combination regimens
+
+&lt;img src="img/multi-nab_auc_fig.png" width="75%" style="display: block; margin: auto;" /&gt;
+---
+
+## Future work
+
+Aspects of this approach are being adopted in several current studies:
+* HVTN immune correlates analyses
+* CoVPN immune correlates analyses
+* WHI metabolomics studies
+
+--
+
+Avenues for future work:
+* web-based tools
+* adding learners to SLAPNAP
+* variable selection (my postdoctoral focus)
+* other variable importance measures (e.g., time-varying AUC)
+
+---
+
+## Closing thoughts
+
+* .blue1[Containerization] can help ensure reproducibility
+
+--
+
+* .blue1[Inference] in the context of machine learning:
+  * prediction performance: .green[rigorous assessment]
+  * variable importance: .green[understanding contributions] in prediction
+
+--
+
+* HIV bnAb pipeline implemented in open-source software `SLAPNAP`
+
+--
+
+[source code](https://github.com/benkeser/slapnap) | [Docker image](https://hub.docker.com/r/slapnap/slapnap)
+
+<i class="fab  fa-github "></i> https://github.com/bdwilliamson
+<i class="fas  fa-globe "></i> https://bdwilliamson.github.io
+
+---
+
+## References
+
+* .small[ Benkeser D, Peterson M, and van der Laan MJ. 2019. Improved Small-Sample Estimation of Nonlinear Cross-Validated Prediction Metrics. _Journal of the American Statistical Association_. ]
+* .small[ Breiman, L. 2001. Random forests. _Machine Learning_.]
+* .small[ Gilbert PB, Juraska M, deCamp AC, Karuna S, et al. 2017. Basis and Statistical Design of the Passive HIV-1 Antibody Mediated Prevention (AMP) Test-of-Concept Efficacy Trials. _Statistical Communications in Infectious Diseases_. ]
+* .small[ Hubbard AE, Kherad-Pajouh S, and van der Laan MJ. 2016. Statistical Inference for Data Adaptive Target Parameters. _International Journal of Biostatistics_. ]
+* .small[ Magaret CA, Benkeser DC, Williamson BD, et al. 2019. Prediction of VRC01 neutralization sensitivity by HIV-1 gp160 sequence features. _PLoS Computational Biology_. ]
+* .small[ van der Laan, MJ. 2006. Statistical inference for variable importance. _The International Journal of Biostatistics_.]
+* .small[ van der Laan MJ, Polley EC, and Hubbard AE. 2007. Super Learner. _Statistical Applications in Genetics and Molecular Biology_. ]
+
+---
+
+## References
+
+* .small[ Williamson B, Gilbert P, Carone M, and Simon N. 2020. Nonparametric variable importance assessment using machine learning techniques (+ rejoinder to discussion). _Biometrics_. ]
+* .small[ Williamson B, Gilbert P, Simon N, and Carone M. 2020. A unified approach for inference on algorithm-agnostic variable importance. _ArXiv technical report_. ]
+* .small[ Williamson B and Feng J. 2020. Efficient nonparametric statistical inference on population feature importance using Shapley values. _ICML_. ]
+* .small[ Wolpert DH. 1992. Stacked generalization. _Neural Networks_. ]
+* .small[ Yoon H, Macke J, West AP, et al. 2015. CATNAP: a tool to compile, analyze and tally neutralizing antibody panels. _Nucleic Acids Research_. ]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "tomorrow-night-blue",
+"highlightLanguage": "rmarkdown",
+"highlightLines": false,
+"slideNumberFormat": "%current%",
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
