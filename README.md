@@ -6,4 +6,4 @@ Slides for a talk on a computational pipeline for predicting HIV-1 sensitivity t
 
 See tagged releases for different versions of the talk.
 
-The slides can be viewed [here](https://bdwilliamson.github.io/slapnap/).
+The slides can be viewed [here](https://bdwilliamson.github.io/slapnaptalk/).
