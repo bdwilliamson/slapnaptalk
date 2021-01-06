@@ -224,11 +224,9 @@ You Google the error, install `gcc`, re-install the package. On the next line:
 
 --
 
-...so you update `R`...
-
+... so you update `R`
 --
-
-...but this breaks the fix for `ggplot2`.
+ ... but this breaks the fix for `ggplot2`.
 
 ---
 
@@ -313,14 +311,14 @@ To create and run a container using Docker:
 &zwj;CATNAP: publicly-available database .small[ [Yoon et al. (2015) _Nuclic Acids Res_] ]:
 
 * $\text{IC}_{50}$ and $\text{IC}_{80}$ neutralization values
-  * $\text{IC}_{x}$: concentration that neutralizes $x$ percent of pseudoviruses
+  - $\text{IC}_{x}$: concentration that neutralizes $x$ percent of pseudoviruses
 
 --
 
 * several derived outcomes:
-  * for $J$ nAbs, $\text{predicted IC}_{k} = \left(\sum_{j=1}^J \text{IC}_{k,j}^{-1}\right)^{-1}$
-  * $\text{Estimated sensitivity} = \text{predicted IC}_{50} < 1$
-  * $\text{Multiple sensitivity} = \sum_{j=1}^J(\text{IC}_{50, j} < 1) \geq 2$
+  - for $J$ nAbs, $\text{predicted IC}_{k} = \left(\sum_{j=1}^J \text{IC}_{k,j}^{-1}\right)^{-1}$
+  - $\text{Estimated sensitivity} = \text{predicted IC}_{50} < 1$
+  - $\text{Multiple sensitivity} = \sum_{j=1}^J(\text{IC}_{50, j} < 1) \geq 2$
 
 ---
 
@@ -744,6 +742,7 @@ sudo docker run \
 knitr::include_graphics("img/slapnap_importance-report.png")
 ```
 
+[example full report](https://benkeser.github.io/slapnap/reports/report_VRC01.html)
 ---
 
 ## Studying SLAPNAP performance
@@ -752,7 +751,7 @@ We evaluated SLAPNAP in two analyses:
 
 --
 
-1. Studying .blue1[all single bnAbs] in CATNAP
+* Studying .blue1[all single bnAbs] in CATNAP
 
 --
 
@@ -762,7 +761,7 @@ We evaluated SLAPNAP in two analyses:
 
 --
 
-2. Studying .green[combination regimens] with sufficient data
+* Studying .green[combination regimens] with sufficient data
 
 --
 
